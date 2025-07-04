@@ -554,17 +554,24 @@ include __DIR__ . '/../partials/layouts/navbar.php';
 <script src="<?php echo BASE_URL; ?>assets/js/ajax/products-table.js"></script>
 
 <script>
-  // Script para actualizar estadísticas (opcional)
-  document.addEventListener('DOMContentLoaded', function() {
-    // Aquí puedes añadir código para cargar las estadísticas
-    // Por ejemplo, una llamada AJAX para obtener los totales
+ 
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("api/products.php?action=stats")
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("totalProducts").textContent = data.totalProducts;
+        document.getElementById("inStock").textContent = data.inStock;
+        document.getElementById("lowStock").textContent = data.lowStock;
+        document.getElementById("totalValue").textContent = "$ " + data.totalValue;
+      } else {
+        console.error("Error al cargar estadísticas:", data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error en la solicitud:", error);
+    });
+});
 
-    // Simulación de carga de estadísticas
-    setTimeout(() => {
-      document.getElementById('totalProducts').textContent = '0';
-      document.getElementById('inStock').textContent = '0';
-      document.getElementById('lowStock').textContent = '0';
-      document.getElementById('totalValue').textContent = '$0.00';
-    }, 500);
-  });
 </script>
+

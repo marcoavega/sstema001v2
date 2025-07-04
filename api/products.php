@@ -295,8 +295,37 @@ case 'delete':
     }
     break;
 
+
+    case 'stats':
+    try {
+        require_once __DIR__ . '/../models/Database.php';
+        $pdo = (new Database())->getConnection();
+
+        $total = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
+        $inStock = $pdo->query("SELECT COUNT(*) FROM products WHERE stock > 0")->fetchColumn();
+        $lowStock = $pdo->query("SELECT COUNT(*) FROM products WHERE stock < 10")->fetchColumn();
+        $totalValue = $pdo->query("SELECT SUM(price * stock) FROM products")->fetchColumn();
+
+        echo json_encode([
+            'success' => true,
+            'totalProducts' => (int)$total,
+            'inStock' => (int)$inStock,
+            'lowStock' => (int)$lowStock,
+            'totalValue' => number_format((float)$totalValue, 2)
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener estadísticas',
+            'error' => $e->getMessage()
+        ]);
+    }
+    break;
+
+
     default:
         http_response_code(400);
         echo json_encode(['success'=>false,'message'=>'Acción no definida']);
 }
 exit;
+
