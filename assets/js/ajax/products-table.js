@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   });
+ 
 
   // Contenedor de la tabla
  var productsTableElement = document.getElementById("products-table");
@@ -56,6 +57,7 @@ var table = new Tabulator("#products-table", {
   ajaxURL: BASE_URL + "api/products.php?action=list",
   ajaxConfig: "GET",
   ajaxParams: {},
+
   paginationDataSent: {
     "page": "page",
     "size": "size",
@@ -838,4 +840,5 @@ if (window.innerWidth < 768) {
     });
   }
 
+  
 });

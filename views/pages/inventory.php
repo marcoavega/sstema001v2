@@ -1,63 +1,103 @@
 <?php
-// Archivo: views/pages/admin_inventory.php
+// Archivo: views/pages/list_product.php
 
 // Verificación de sesión
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
 if (!isset($_SESSION['user'])) {
-    header("Location: " . BASE_URL . "auth/login/");
-    exit();
+  header("Location: " . BASE_URL . "auth/login/");
+  exit();
 }
 
 // Obtener segmento de URL para destacar menú activo
-$uri = $_GET['url'] ?? 'inventory';
+$uri = $_GET['url'] ?? 'list_product';
 $segment = explode('/', trim($uri, '/'))[0];
 
-// Iniciar buffer
+// Iniciar buffer de salida
 ob_start();
 
-// Conexión a BD si necesitas cargar datos (por ejemplo categorías):
+// Conexión a la base de datos
 require_once __DIR__ . '/../../models/Database.php';
 $pdo = (new Database())->getConnection();
-
-// Ejemplo: cargar categorías o datos necesarios para filtros en el inventario
-// $stmt = $pdo->query("SELECT id_category, name FROM categories ORDER BY name");
-// $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Nombre de usuario para mostrar
 $username = htmlspecialchars($_SESSION['user']['username']);
 
-// Definir ítems del menú lateral, agregando 'inventory'
+// Incluir menú lateral de productos/inventario
 require_once __DIR__ . '/../partials/layouts/lateral_menu_products.php';
 ?>
 
-<div class="container-fluid m-0 p-0">
+<div class="container-fluid m-0 p-0 min-vh-100" data-bs-theme="auto">
   <div class="row g-0">
-    <!-- Sidebar lateral -->
+
+    <!-- Barra lateral con gradiente moderno -->
     <nav class="col-md-2 d-none d-md-block sidebar min-vh-100">
-      <ul class="nav flex-column pt-3">
-        <?php foreach ($menuItems as $route => $item): ?>
-          <li class="nav-item mb-2">
-            <a class="nav-link text-body d-flex align-items-center <?= $segment === $route ? 'active fw-bold' : '' ?>"
-              href="<?= BASE_URL . $route ?>">
-              <i class="bi bi-<?= $item['icon'] ?> me-2"></i> <?= $item['label'] ?>
-            </a>
-          </li>
-        <?php endforeach; ?>
-      </ul>
+      <div class="pt-4 px-3">
+        <div class="text-center mb-4">
+          <div class=" rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+            <i class="bi bi-box-seam text-primary fs-3"></i>
+          </div>
+          <h6 class=" mt-2 mb-0">Inventario</h6>
+        </div>
+
+        <ul class="nav flex-column">
+          <?php foreach ($menuItems as $route => $item): ?>
+            <li class="nav-item mb-2">
+              <a class="nav-link d-flex align-items-center px-3 py-2 rounded-3 <?= $segment === $route ? 'bg-primary text-white fw-bold' : 'text-body' ?>"
+              href="<?= BASE_URL . $route ?>" style="transition: all 0.3s ease;">
+                <i class="bi bi-<?= $item['icon'] ?> me-3 fs-5"></i>
+                <span class="fw-medium"><?= $item['label'] ?></span>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
     </nav>
 
     <!-- Contenido principal -->
-    <main class="col-12 col-md-10 px-4 py-3">
-      <!-- Menú desplegable para pantallas pequeñas -->
-      <div class="d-md-none mb-3">
-        <div class="dropdown">
-          <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" id="mobileMenuBtn" data-bs-toggle="dropdown">
-            <i class="bi bi-list me-1"></i> Menú
-          </button>
-          <ul class="dropdown-menu w-100" aria-labelledby="mobileMenuBtn">
+    <main class="col-12 col-md-10">
+
+      <!-- Header con breadcrumb moderno -->
+      <div class="bg-body shadow-sm border-bottom">
+        <div class="container-fluid px-4 py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                  <li class="breadcrumb-item"><a href="<?= BASE_URL ?>dashboard" class="text-decoration-none">Dashboard</a></li>
+                  <li class="breadcrumb-item active">Inventario de Productos</li>
+                </ol>
+              </nav>
+              <h4 class="mb-0 fw-bold">Gestión de Inventario</h4>
+              <small class="text-muted">Bienvenido, <?= $username ?></small>
+            </div>
+
+            <!-- Menú móvil mejorado -->
+            <div class="d-md-none">
+              <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                <i class="bi bi-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menú móvil offcanvas -->
+      <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header bg-primary-subtle">
+          <h5 class="offcanvas-title">
+            <i class="bi bi-box-seam me-2"></i>Inventario
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body bg-body">
+          <ul class="nav flex-column">
             <?php foreach ($menuItems as $route => $item): ?>
-              <li>
-                <a class="dropdown-item <?= $segment === $route ? 'active fw-bold' : '' ?>" href="<?= BASE_URL . $route ?>">
-                  <i class="bi bi-<?= $item['icon'] ?> me-1"></i> <?= $item['label'] ?>
+              <li class="nav-item mb-2">
+                <a class="nav-link text-body d-flex align-items-center px-3 py-2 rounded-3 <?= $segment === $route ? 'active bg-primary text-white' : '' ?>"
+                  href="<?= BASE_URL . $route ?>">
+                  <i class="bi bi-<?= $item['icon'] ?> me-3"></i> <?= $item['label'] ?>
                 </a>
               </li>
             <?php endforeach; ?>
@@ -65,144 +105,135 @@ require_once __DIR__ . '/../partials/layouts/lateral_menu_products.php';
         </div>
       </div>
 
-      <!-- Verificación de permisos: ajustar según tu lógica -->
+      <!-- Verificación de permisos -->
       <?php if ($_SESSION['user']['level_user'] != 1): ?>
-        <h2>Acceso Denegado</h2>
-        <div class="alert alert-danger">No tienes permiso para ver esta página.</div>
+        <div class="container-fluid px-4 py-5">
+          <div class="row justify-content-center">
+            <div class="col-md-6">
+              <div class="card border-0 shadow-lg">
+                <div class="card-body text-center py-5">
+                  <div class="mb-4">
+                    <i class="bi bi-shield-exclamation text-warning" style="font-size: 4rem;"></i>
+                  </div>
+                  <h3 class="fw-bold text-warning mb-3">Acceso Denegado</h3>
+                  <p class="text-muted mb-4">No tienes los permisos necesarios para acceder a esta sección del sistema.</p>
+                  <a href="<?= BASE_URL ?>dashboard" class="btn btn-primary px-4">
+                    <i class="bi bi-house me-2"></i>Volver al Dashboard
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       <?php else: ?>
-        <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
-          <h2 class="mb-0">Administración de Inventario</h2>
-          <span class="text-muted">Bienvenido, <?= $username ?>.</span>
+
+        <div class="container-fluid px-4 py-4">
+
+          <!-- Panel de estadísticas rápidas -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card bg-primary bg-opacity-10 border-0 h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-boxes text-primary fs-2 mb-3"></i>
+                  <h6 class="text-primary mb-1">Total Productos</h6>
+                  <h4 class="fw-bold mb-0" id="totalProducts">-</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-success bg-opacity-10 border-0 h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-check-circle text-success fs-2 mb-3"></i>
+                  <h6 class="text-success mb-1">En Stock</h6>
+                  <h4 class="fw-bold mb-0" id="inStock">-</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-warning bg-opacity-10 border-0 h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-exclamation-triangle text-warning fs-2 mb-3"></i>
+                  <h6 class="text-warning mb-1">Stock Bajo</h6>
+                  <h4 class="fw-bold mb-0" id="lowStock">-</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-info bg-opacity-10 border-0 h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-currency-dollar text-info fs-2 mb-3"></i>
+                  <h6 class="text-info mb-1">Valor Total</h6>
+                  <h4 class="fw-bold mb-0" id="totalValue">-</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel de control principal -->
+          <div class="card shadow-lg border-0 rounded-4">
+            
+
+            <div class="card-body p-4">
+
+              
+
+            </div>
+          </div>
         </div>
 
-        <!-- Botones de acción -->
-        <div class="row mb-3 g-2">
-          <div class="col-12 col-md-auto">
-            <button id="addProductBtn" class="btn btn-primary">Agregar Producto</button>
-          </div>
-          <div class="col-12 col-md-auto">
-            <button id="exportCSVBtn" class="btn btn-outline-primary">Exportar a CSV</button>
-          </div>
-          <div class="col-12 col-md-auto">
-            <button id="exportExcelBtn" class="btn btn-outline-success">Exportar a Excel</button>
-          </div>
-          <div class="col-12 col-md-auto">
-            <button id="exportPDFBtn" class="btn btn-outline-danger">Exportar a PDF</button>
-          </div>
-          <div class="col-12 col-md-auto">
-            <button id="exportJSONBtn" class="btn btn-outline-secondary">Exportar a JSON</button>
-          </div>
-        </div>
-
-        <!-- Buscador / filtros del inventario -->
-        <div class="mb-3 row g-2">
-          <div class="col-12 col-md-4">
-            <input type="text" id="inventory-search" class="form-control" placeholder="Buscar por nombre o código">
-          </div>
-          <!-- Ejemplo de filtro por categoría:
-          <div class="col-12 col-md-3">
-            <select id="filter-category" class="form-select">
-              <option value="">Todas las categorías</option>
-              <?php /* foreach ($categories as $cat): */ ?>
-              <?php /* <option value="<?= $cat['id_category'] ?>"><?= htmlspecialchars($cat['name']) ?></option> */ ?>
-              <?php /* endforeach; */ ?>
-            </select>
-          </div>
-          -->
-        </div>
-
-        <!-- Tabla de inventario -->
-        <div id="inventory-table"></div>
-
-        <!-- Modales: Editar, Eliminar, Agregar Producto -->
-        <?php
-        // Incluye los modales específicos del inventario; crea estos archivos según necesites.
-        // Por ejemplo:
-        // include __DIR__ . '/../partials/modals/modal_add_product.php';
-        // include __DIR__ . '/../partials/modals/modal_edit_product.php';
-        // include __DIR__ . '/../partials/modals/modal_delete_product.php';
-        ?>
+        
       <?php endif; ?>
     </main>
   </div>
 </div>
 
+<style>
+  .sidebar .nav-link:hover {
+    transform: translateX(5px);
+  }
+
+  .transition-all {
+    transition: all 0.3s ease;
+  }
+
+  .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+
+</style>
+
 <?php
 $content = ob_get_clean();
-// Incluye el layout principal, que internamente incluye el navbar superior y los estilos de tu proyecto.
-// Ajusta la ruta si tu proyecto usa otra estructura.
 include __DIR__ . '/../partials/layouts/navbar.php';
 ?>
 
-<!-- Script para gestión de inventario -->
-<script src="<?php echo BASE_URL; ?>assets/js/ajax/admin-inventory.js">
-    document.addEventListener("DOMContentLoaded", function(){
-  var table = new Tabulator("#inventory-table", {
-    index: "product_id",
-    ajaxURL: BASE_URL + "api/inventory.php?action=get",
-    ajaxConfig: "GET",
-    layout: "fitColumns",
-    responsiveLayout: "collapse",
-    placeholder: "Cargando inventario...",
-    columns: [
-      { title: "ID", field: "product_id", width: 70, sorter: "number" },
-      { title: "Nombre", field: "name" },
-      { title: "SKU", field: "sku" },
-      { title: "Categoría", field: "category_name" },
-      { title: "Stock", field: "stock", hozAlign: "center" },
-      { title: "Precio", field: "price", hozAlign: "right", formatter: "money" },
-      { title: "Creado", field: "created_at", formatter: function(cell){ /* formato de fecha */ } },
-      { title: "Actualizado", field: "updated_at", formatter: function(cell){ /* formato de fecha */ } },
-      {
-        title: "Acciones",
-        hozAlign: "center",
-        formatter: function(){
-          return "<div class='btn-group'>" +
-                   "<button class='btn btn-sm btn-info edit-btn me-1'>Editar</button>" +
-                   "<button class='btn btn-sm btn-danger delete-btn'>Eliminar</button>" +
-                 "</div>";
-        },
-        cellClick: function(e, cell){
-          var rowData = cell.getRow().getData();
-          if(e.target.classList.contains("edit-btn")){
-            // Rellenar modal de edición con rowData...
-          }
-          if(e.target.classList.contains("delete-btn")){
-            // Abrir modal de confirmación...
-          }
-        }
-      },
-    ],
-  });
+<!-- Script JS -->
+<script src="<?php echo BASE_URL; ?>assets/js/ajax/products-table.js"></script>
 
-  // Filtro búsqueda en tiempo real
-  var searchInput = document.getElementById("inventory-search");
-  if(searchInput){
-    searchInput.addEventListener("input", function(){
-      var q = searchInput.value.toLowerCase();
-      table.setFilter(function(data){
-        return data.name.toLowerCase().includes(q) || data.sku.toLowerCase().includes(q);
-      });
+<script>
+ 
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("api/products.php?action=stats")
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("totalProducts").textContent = data.totalProducts;
+        document.getElementById("inStock").textContent = data.inStock;
+        document.getElementById("lowStock").textContent = data.lowStock;
+        document.getElementById("totalValue").textContent = "$ " + data.totalValue;
+      } else {
+        console.error("Error al cargar estadísticas:", data.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error en la solicitud:", error);
     });
-  }
-
-  // Agregar Producto
-  document.getElementById("addProductBtn").addEventListener("click", function(){
-    // Mostrar modal_add_product
-  });
-
-  // Exportaciones CSV/Excel/PDF/JSON: similares a admin-users.js, ajusta columnas y encabezados.
-  // Por ejemplo, en exportPDFBtn, si quieres título centrado, etc.
-
-  // ...
 });
 
 </script>
-<!-- admin-inventory.js debe manejar:
-     - Inicializar Tabulator en '#inventory-table'
-     - Cargar datos vía AJAX: BASE_URL + 'api/inventory.php?action=get'
-     - Manejadores para agregar/editar/eliminar producto, exportar, etc.
-     - Filtros (search input), exportaciones CSV/Excel/PDF/JSON similares a admin-users.js,
-       incluyendo centrado y estilo de títulos en PDF si lo deseas.
--->
 
