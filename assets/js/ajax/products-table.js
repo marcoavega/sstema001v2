@@ -49,8 +49,8 @@ var table = new Tabulator("#products-table", {
   
   // Configuración moderna de paginación
   pagination: "remote",
-  paginationSize: 20,
-  paginationSizeSelector: [10, 20, 30, 50, 100, 200, 500, 1000, 2000, 3000, 4000, 5000, 10000],
+  paginationSize: 50,
+  paginationSizeSelector: [50, 100, 200, 500, 1000, 2000, 3000, 4000, 5000, 10000],
   paginationButtonCount: 7,
   
   // Configuración AJAX
